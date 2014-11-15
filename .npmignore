@@ -1,0 +1,18 @@
+*.sublime-*
+_gh_pages
+benchmark
+bower_components
+node_modules
+npm-debug.log
+temp
+test/actual
+tmp
+TODO.md
+vendor
+
+# npmignore
+.travis.yml
+.verb.md
+fixtures
+test
+test.js
