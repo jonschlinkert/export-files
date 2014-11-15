@@ -1,0 +1,45 @@
+{
+  "name": "export-files",
+  "description": "node.js utility for exporting a directory of files as modules.",
+  "version": "0.1.2",
+  "homepage": "https://github.com/jonschlinkert/export-files",
+  "author": {
+    "name": "Jon Schlinkert",
+    "url": "https://github.com/jonschlinkert"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jonschlinkert/export-files.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/export-files/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jonschlinkert/export-files/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "should": "*"
+  },
+  "keywords": [
+    "export",
+    "exports",
+    "file",
+    "files",
+    "module",
+    "modules"
+  ],
+  "dependencies": {
+    "filter-files": "^0.2.5"
+  }
+}
