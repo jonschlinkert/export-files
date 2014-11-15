@@ -9,12 +9,11 @@
 
 var fs = require('fs');
 var path = require('path');
-var files = require('filter-files');
 
-module.exports = function(dir, recurse) {
+module.exports = function(dir) {
   var o = {};
 
-  files.sync(dir, recurse).forEach(function (name) {
+  fs.readdirSync(dir).forEach(function (name) {
     var base = path.basename(name, path.extname(name));
     var fp = path.resolve(dir, name);
 
