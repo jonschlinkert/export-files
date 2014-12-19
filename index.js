@@ -10,15 +10,26 @@
 var fs = require('fs');
 var path = require('path');
 
-module.exports = function(dir, recurse) {
+module.exports = function(dir, recurse, opts) {
   var o = {};
 
-  walk(dir, recurse).forEach(function (name) {
-    var base = path.basename(name, path.extname(name));
-    var fp = path.resolve(dir, name);
+  if (typeof opts === 'boolean') {
+    recurse = opts
+  }
+  if (typeof recurse === 'object') {
+    opts = recurse
+  }
 
-    if (/\.js$/.test(name) && !/index/.test(name) && fs.statSync(fp).isFile()) {
-      o[base] = require(fp);
+  opts = opts || {};
+
+  walk(dir, recurse, opts).forEach(function (name) {
+    var fp = path.resolve(dir, name);
+    var key = opts.key && opts.key(fp) || defaultKey(fp);
+
+    if ((opts.filter && opts.filter(fp) || defaultFilter(fp))
+      && !/index/.test(name)
+      && fs.statSync(fp).isFile()) {
+      o[key] = require(fp);
     }
   });
 
@@ -26,7 +37,7 @@ module.exports = function(dir, recurse) {
 };
 
 
-function walk(dir, recurse) {
+function walk(dir, recurse, opts) {
   if (typeof dir !== 'string') {
     throw new Error('export-files expects a string as the first argument.');
   }
@@ -47,7 +58,7 @@ function walk(dir, recurse) {
     while (len--) {
       var fp = path.join(dir, files[i++]);
       if (fs.statSync(fp).isDirectory()) {
-        arr.push.apply(arr, walk(fp, recurse));
+        arr.push.apply(arr, walk(fp, recurse, opts));
       } else {
         arr = arr.concat(fp);
       }
@@ -55,4 +66,12 @@ function walk(dir, recurse) {
   } catch(err) {}
 
   return arr;
+}
+
+function defaultKey(fp) {
+  return path.basename(fp, path.extname(fp));
+}
+
+function defaultFilter(fp) {
+  return /\.js$/.test(fp);
 }
