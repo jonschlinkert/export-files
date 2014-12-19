@@ -24,18 +24,19 @@ module.exports = function(dir, recurse, opts) {
 
   walk(dir, recurse, opts).forEach(function (name) {
     var fp = path.resolve(dir, name);
-    var key = opts.key && opts.key(fp) || defaultKey(fp);
+    var key = opts.key && opts.key(fp, opts) || defaultKey(fp);
+    var filter = opts.filter || defaultFilter;
 
-    if (check(fp, opts)) {
+    if (filter(fp, opts) && check(fp, opts)) {
       if (opts.yaml) {
-        o[key] = opts.yaml(fp);
+        o[key] = opts.yaml(fp, opts);
         return;
       }
       if (opts.text) {
-        o[key] = opts.read && opts.read(fp) || readFileSync(fp, opts);
+        o[key] = opts.read && opts.read(fp, opts) || readFileSync(fp, opts);
         return;
       }
-      o[key] = opts.read && opts.read(fp) || require(fp);
+      o[key] = opts.read && opts.read(fp, opts) || require(fp);
     }
   });
 
@@ -75,9 +76,8 @@ function walk(dir, recurse, opts) {
 }
 
 function check(fp, opts) {
-  return (opts.filter && opts.filter(fp) || defaultFilter(fp)) &&
-    !/index\.js$/.test(path.basename(fp)) &&
-    (opts.stat && opts.stat(fp).isFile() || defaultStat(fp).isFile())
+  return !/index/.test(path.basename(fp)) &&
+    (opts.stat && opts.stat(fp, opts).isFile() || defaultStat(fp).isFile())
 }
 
 function defaultKey(fp) {
@@ -94,16 +94,14 @@ function defaultStat(fp) {
 
 function readFileSync(fp, opts) {
   opts = opts || {};
-  var noThrow = opts && !opts.throws
+  opts.encoding = opts.encoding || opts.enc || 'utf8'
 
-  opts.encoding = opts.encoding || opts.enc || 'utf-8'
-
-  if (!noThrow) {
-    return fs.readFileSync(fp, opts)
+  if (!(opts && !opts.throws)) {
+    return fs.readFileSync(fp, opts);
   }
 
   try {
-    return fs.readFileSync(fp, opts)
+    return fs.readFileSync(fp, opts);
   } catch (err) {
     return null;
   }
