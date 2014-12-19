@@ -28,7 +28,7 @@
     "test": "mocha -R spec"
   },
   "devDependencies": {
-    "benchmarked": "^0.1.3",
+    "read-yaml": "*",
     "mocha": "*",
     "should": "*"
   },
