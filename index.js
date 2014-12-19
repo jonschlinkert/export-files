@@ -10,7 +10,22 @@
 var fs = require('fs');
 var path = require('path');
 
-module.exports = function(dir, recurse, opts) {
+/**
+ * @name   exportFiles
+ * @param  {String} `dir` directory to read and export
+ * @param  {Boolean} `recurse` when `true`, read directory recursivly, default `false`
+ * @param  {Object} `opts` control options
+ *   @option {Boolean} [opts] `text`
+ *   @option {Function} [opts] `key`
+ *   @option {Function} [opts] `read`
+ *   @option {Function} [opts] `stat`
+ *   @option {Function} [opts] `yaml`
+ *   @option {Function} [opts] `filter`
+ *   @option {*} [opts] `*` any other option that can pass to `fs.readFile` and `fs.stat`
+ * @return {Object}
+ * @api public
+ */
+module.exports = function exportFiles(dir, recurse, opts) {
   var o = {};
 
   if (typeof opts === 'boolean') {
@@ -64,7 +79,7 @@ function walk(dir, recurse, opts) {
 
     while (len--) {
       var fp = path.join(dir, files[i++]);
-      if (opts.stat && opts.stat(fp).isDirectory() || defaultStat(fp).isDirectory()) {
+      if (opts.stat && opts.stat(fp, opts).isDirectory() || defaultStat(fp).isDirectory()) {
         arr.push.apply(arr, walk(fp, recurse, opts));
       } else {
         arr = arr.concat(fp);
