@@ -11,18 +11,21 @@ npm i export-files --save
 ## API
 
 ### [.exportFiles](index.js#L22)
-* `dir` **{String}**: directory to read and export (required)
+> See [tests](./test.js) for more examples
+
+* `dir` **{String}**: directory to read and export
 * `recurse` **{Boolean}**: when `true`, read directory recursivly, default `false`
 * `opts` **{Object}**: control options
-  - `recurse` **{Boolean}**
-  - `text` **{Boolean}**
-  - `key` **{Function}**
-  - `read` **{Function}**
-  - `stat` **{Function}**
-  - `yaml` **{Function}**
-  - `filter` **{Function}**
-  - `*` **{*}**: any other option that can pass to `fs.readFile` and `fs.stat`
+  - `recurse` **{Boolean}** guess.. if defined will be overwritten
+  - `text` **{Boolean}** should be `true` when you want to export other files, eg `.css`
+  - `key` **{Function}** `function(fp, opts)`, where `opts` is same provided options object
+  - `read` **{Function}** `function(fp, opts)`, where `fp` is full filepath, default is `fs.readFileSync`
+  - `stat` **{Function}** `function(fp, opts)`, custom stat function, default is `fs.statSync`
+  - `yaml` **{Function}** `function(fp, opts)`
+  - `filter` **{Function}** signature `function(fp, opts)`, default filter is only for `.js` files
+  - `*` **{*}**: any other options, eg `encoding` for `fs.readFileSync` or your custom `opts.read` fn
 * `returns`: {Object}
+
 
 ## Usage
 Given you have the following files:
