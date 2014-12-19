@@ -8,19 +8,19 @@
 npm i export-files --save
 ```
 
-### [.exportFiles](index.js#L29)
+## API
 
-* `dir` **{String}**: directory to read and export    
-* `recurse` **{Boolean}**: when `true`, read directory recursivly, default `false`    
-* `opts` **{Object}**: control options  
-    - `text` **{Boolean}**
-    - `key` **{Function}**
-    - `read` **{Function}**
-    - `stat` **{Function}**
-    - `yaml` **{Function}**
-    - `filter` **{Function}**
-    - `*` **{*}**: any other option that can pass to `fs.readFile` and `fs.stat`
-      
+### [.exportFiles](index.js#L22)
+* `dir` **{String}**: directory to read and export
+* `recurse` **{Boolean}**: when `true`, read directory recursivly, default `false`
+* `opts` **{Object}**: control options
+  - `text` **{Boolean}**
+  - `key` **{Function}**
+  - `read` **{Function}**
+  - `stat` **{Function}**
+  - `yaml` **{Function}**
+  - `filter` **{Function}**
+  - `*` **{*}**: any other option that can pass to `fs.readFile` and `fs.stat`
 * `returns`: {Object}
 
 ## Usage

@@ -1,4 +1,4 @@
-/*!
+/**
  * export-files <https://github.com/jonschlinkert/export-files>
  *
  * Copyright (c) 2014 Jon Schlinkert, contributors.
@@ -15,13 +15,6 @@ var path = require('path');
  * @param  {String} `dir` directory to read and export
  * @param  {Boolean} `recurse` when `true`, read directory recursivly, default `false`
  * @param  {Object} `opts` control options
- *   @option {Boolean} [opts] `text`
- *   @option {Function} [opts] `key`
- *   @option {Function} [opts] `read`
- *   @option {Function} [opts] `stat`
- *   @option {Function} [opts] `yaml`
- *   @option {Function} [opts] `filter`
- *   @option {*} [opts] `*` any other option that can pass to `fs.readFile` and `fs.stat`
  * @return {Object}
  * @api public
  */
