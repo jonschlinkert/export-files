@@ -26,10 +26,16 @@ module.exports = function(dir, recurse, opts) {
     var fp = path.resolve(dir, name);
     var key = opts.key && opts.key(fp) || defaultKey(fp);
 
-    if ((opts.filter && opts.filter(fp) || defaultFilter(fp))
-      && !/index/.test(name)
-      && fs.statSync(fp).isFile()) {
-      o[key] = require(fp);
+    if (check(fp, opts)) {
+      if (opts.yaml) {
+        o[key] = opts.yaml(fp);
+        return;
+      }
+      if (opts.text) {
+        o[key] = opts.read && opts.read(fp) || readFileSync(fp, opts);
+        return;
+      }
+      o[key] = opts.read && opts.read(fp) || require(fp);
     }
   });
 
@@ -57,7 +63,7 @@ function walk(dir, recurse, opts) {
 
     while (len--) {
       var fp = path.join(dir, files[i++]);
-      if (fs.statSync(fp).isDirectory()) {
+      if (opts.stat && opts.stat(fp).isDirectory() || defaultStat(fp).isDirectory()) {
         arr.push.apply(arr, walk(fp, recurse, opts));
       } else {
         arr = arr.concat(fp);
@@ -68,10 +74,37 @@ function walk(dir, recurse, opts) {
   return arr;
 }
 
+function check(fp, opts) {
+  return (opts.filter && opts.filter(fp) || defaultFilter(fp)) &&
+    !/index\.js$/.test(path.basename(fp)) &&
+    (opts.stat && opts.stat(fp).isFile() || defaultStat(fp).isFile())
+}
+
 function defaultKey(fp) {
   return path.basename(fp, path.extname(fp));
 }
 
 function defaultFilter(fp) {
   return /\.js$/.test(fp);
+}
+
+function defaultStat(fp) {
+  return fs.statSync(fp);
+}
+
+function readFileSync(fp, opts) {
+  opts = opts || {};
+  var noThrow = opts && !opts.throws
+
+  opts.encoding = opts.encoding || opts.enc || 'utf-8'
+
+  if (!noThrow) {
+    return fs.readFileSync(fp, opts)
+  }
+
+  try {
+    return fs.readFileSync(fp, opts)
+  } catch (err) {
+    return null;
+  }
 }
