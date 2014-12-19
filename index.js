@@ -29,8 +29,9 @@ module.exports = function exportFiles(dir, recurse, opts) {
   }
 
   opts = opts || {};
+  opts.recurse = opts.recurse || recurse || false;
 
-  walk(dir, recurse, opts).forEach(function (name) {
+  walk(dir, opts.recurse, opts).forEach(function (name) {
     var fp = path.resolve(dir, name);
     var key = opts.key && opts.key(fp, opts) || defaultKey(fp);
     var filter = opts.filter || defaultFilter;

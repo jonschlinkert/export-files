@@ -11,9 +11,10 @@ npm i export-files --save
 ## API
 
 ### [.exportFiles](index.js#L22)
-* `dir` **{String}**: directory to read and export
+* `dir` **{String}**: directory to read and export (required)
 * `recurse` **{Boolean}**: when `true`, read directory recursivly, default `false`
 * `opts` **{Object}**: control options
+  - `recurse` **{Boolean}**
   - `text` **{Boolean}**
   - `key` **{Function}**
   - `read` **{Function}**
