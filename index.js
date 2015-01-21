@@ -1,7 +1,7 @@
 /**
  * export-files <https://github.com/jonschlinkert/export-files>
  *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
+ * Copyright (c) 2014-2015, Jon Schlinkert.
  * Licensed under the MIT license.
  */
 
@@ -9,109 +9,130 @@
 
 var fs = require('fs');
 var path = require('path');
+var typeOf = require('kind-of');
+var extend = require('extend-shallow');
 
 /**
- * @name   exportFiles
- * @param  {String} `dir` directory to read and export
- * @param  {Boolean} `recurse` when `true`, read directory recursivly, default `false`
- * @param  {Object} `opts` control options
- * @return {Object}
- * @api public
+ * Expose `exportFiles`
  */
-module.exports = function exportFiles(dir, recurse, opts) {
-  var o = {};
 
-  if (typeof opts === 'boolean') {
-    recurse = opts
-  }
-  if (typeof recurse === 'object') {
-    opts = recurse
+module.exports = function exportFiles(dir, recurse, options, fn) {
+  if (typeOf(recurse) === 'function') {
+    fn = recurse; options = {}; recurse = false;
   }
 
-  opts = opts || {};
-  opts.recurse = opts.recurse || recurse || false;
+  if (typeOf(options) === 'function') {
+    fn = options; options = {};
+  }
 
-  walk(dir, opts.recurse, opts).forEach(function (name) {
-    var fp = path.resolve(dir, name);
-    var key = opts.key && opts.key(fp, opts) || defaultKey(fp);
-    var filter = opts.filter || defaultFilter;
+  if (typeOf(recurse) === 'object') {
+    options = recurse; recurse = false;
+  }
 
-    if (filter(fp, opts) && check(fp, opts)) {
-      if (opts.yaml) {
-        o[key] = opts.yaml(fp, opts);
-        return;
-      }
-      if (opts.text) {
-        o[key] = opts.read && opts.read(fp, opts) || readFileSync(fp, opts);
-        return;
-      }
-      o[key] = opts.read && opts.read(fp, opts) || require(fp);
+  var opts = extend({recurse: recurse || false}, options);
+
+  return lookup(dir, opts.recurse, opts).reduce(function (res, fp) {
+    if (filter(fp, opts, fn)) {
+      res[renameKey(fp, opts)] = read(fp, opts, fn);
     }
-  });
-
-  return o;
+    return res;
+  }, {});
 };
 
+/**
+ * Recursively read directories, starting with the given `dir`.
+ *
+ * @param  {String} `dir`
+ * @param  {Boolean} `recurse` Should the function recurse?
+ * @return {Array} Returns an array of files.
+ */
 
-function walk(dir, recurse, opts) {
+function lookup(dir, recurse) {
   if (typeof dir !== 'string') {
     throw new Error('export-files expects a string as the first argument.');
   }
 
-  var arr = [];
+  var files = fs.readdirSync(dir);
+  var len = files.length;
+  var res = [];
 
-  try {
-    var files = fs.readdirSync(dir);
-    var len = files.length;
-    var i = 0;
+  if (recurse === false) return files.map(resolve(dir));
 
-    if (Boolean(recurse) === false) {
-      return files.map(function (fp) {
-        return path.join(dir, fp);
-      });
+  while (len--) {
+    var fp = path.resolve(dir, files[len]);
+    if (isDir(fp)) {
+      res.push.apply(res, lookup(fp, recurse));
+    } else {
+      res.push(fp);
     }
-
-    while (len--) {
-      var fp = path.join(dir, files[i++]);
-      if (opts.stat && opts.stat(fp, opts).isDirectory() || defaultStat(fp).isDirectory()) {
-        arr.push.apply(arr, walk(fp, recurse, opts));
-      } else {
-        arr = arr.concat(fp);
-      }
-    }
-  } catch(err) {}
-
-  return arr;
+  }
+  return res;
 }
 
-function check(fp, opts) {
-  return !/index/.test(path.basename(fp)) &&
-    (opts.stat && opts.stat(fp, opts).isFile() || defaultStat(fp).isFile())
-}
+/**
+ * Rename object keys with a custom function.
+ * If no function is passed, the basname is
+ * returned.
+ */
 
-function defaultKey(fp) {
-  return path.basename(fp, path.extname(fp));
-}
-
-function defaultFilter(fp) {
-  return /\.js$/.test(fp);
-}
-
-function defaultStat(fp) {
-  return fs.statSync(fp);
-}
-
-function readFileSync(fp, opts) {
-  opts = opts || {};
-  opts.encoding = opts.encoding || opts.enc || 'utf8'
-
-  if (!(opts && !opts.throws)) {
-    return fs.readFileSync(fp, opts);
+function renameKey(fp, opts) {
+  if (opts && opts.renameKey) {
+    return opts.renameKey(fp, opts);
   }
 
-  try {
-    return fs.readFileSync(fp, opts);
-  } catch (err) {
-    return null;
+  var ext = path.extname(fp);
+  return path.basename(fp, ext);
+}
+
+/**
+ * Read or require the given file with `opts`
+ */
+
+function read(fp, opts, fn) {
+  opts = extend({encoding: 'utf8'}, opts);
+  if (opts.read) {
+    return opts.read(fp, opts);
+  } else if (fn) {
+    return fn(fp, opts);
+  } else {
+    try {
+      if (/\.js(on)?$/.test(fp)) {
+        return require(fp);
+      } else {
+        return fs.readFileSync(fp, opts);
+      }
+    } catch (err) {
+      if (!opts.silent) throw err;
+    }
+  }
+}
+
+/**
+ * Validate (filter) files using the given filter
+ * function, falling back on the default filter.
+ */
+
+function filter(fp, opts) {
+  if (opts && opts.filter) {
+    return opts.filter(fp, opts);
+  }
+  return /[^x]\.js$/.test(fp);
+}
+
+/**
+ * Utility functions
+ */
+
+function isDir(fp) {
+  return fs.statSync(fp).isDirectory();
+}
+
+function isFile(fp) {
+  return !isDir(fp)
+}
+
+function resolve(dir) {
+  return function (fp) {
+    return path.resolve(dir, fp);
   }
 }
