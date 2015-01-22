@@ -1,7 +1,7 @@
-/*!
+/**
  * export-files <https://github.com/jonschlinkert/export-files>
  *
- * Copyright (c) 2014 Jon Schlinkert, contributors.
+ * Copyright (c) 2014-2015, Jon Schlinkert.
  * Licensed under the MIT license.
  */
 
@@ -9,50 +9,149 @@
 
 var fs = require('fs');
 var path = require('path');
+var typeOf = require('kind-of');
+var extend = require('extend-shallow');
+var micromatch = require('micromatch');
 
-module.exports = function(dir, recurse) {
-  var o = {};
+/**
+ * Expose `exportFiles`
+ */
 
-  walk(dir, recurse).forEach(function (name) {
-    var base = path.basename(name, path.extname(name));
-    var fp = path.resolve(dir, name);
+module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
+  var args = [].slice.call(arguments, 1);
+  var rest = sortArgs(args);
+  var re = rest['regexp'];
+  patterns = rest['string'] || rest['array'];
+  recurse = rest['boolean'];
+  options = rest['object'];
+  fn = rest['function'];
 
-    if (/\.js$/.test(name) && !/index/.test(name) && fs.statSync(fp).isFile()) {
-      o[base] = require(fp);
+  var opts = extend({recurse: recurse || false}, options);
+  if (patterns) {
+    opts.filter = function (fp) {
+      return micromatch.makeRe(patterns).test(fp);
     }
-  });
+  }
+  if (re) {
+    opts.filter = function (fp) {
+      return re.test(fp);
+    }
+  }
 
-  return o;
+  return lookup(dir, opts.recurse, opts).reduce(function (res, fp) {
+    if (filter(fp, opts, fn)) {
+      res[renameKey(fp, opts)] = read(fp, opts, fn);
+    }
+    return res;
+  }, {});
 };
 
+/**
+ * Recursively read directories, starting with the given `dir`.
+ *
+ * @param  {String} `dir`
+ * @param  {Boolean} `recurse` Should the function recurse?
+ * @return {Array} Returns an array of files.
+ */
 
-function walk(dir, recurse) {
+function lookup(dir, recurse) {
   if (typeof dir !== 'string') {
     throw new Error('export-files expects a string as the first argument.');
   }
 
-  var arr = [];
+  var files = fs.readdirSync(dir);
+  var len = files.length;
+  var res = [];
 
-  try {
-    var files = fs.readdirSync(dir);
-    var len = files.length;
-    var i = 0;
+  if (recurse === false) return files.map(resolve(dir));
 
-    if (Boolean(recurse) === false) {
-      return files.map(function (fp) {
-        return path.join(dir, fp);
-      });
+  while (len--) {
+    var fp = path.resolve(dir, files[len]);
+    if (isDir(fp)) {
+      res.push.apply(res, lookup(fp, recurse));
+    } else {
+      res.push(fp);
     }
+  }
+  return res;
+}
 
-    while (len--) {
-      var fp = path.join(dir, files[i++]);
-      if (fs.statSync(fp).isDirectory()) {
-        arr.push.apply(arr, walk(fp, recurse));
+/**
+ * Rename object keys with a custom function.
+ * If no function is passed, the basname is
+ * returned.
+ */
+
+function renameKey(fp, opts) {
+  if (opts && opts.renameKey) {
+    return opts.renameKey(fp, opts);
+  }
+
+  var ext = path.extname(fp);
+  return path.basename(fp, ext);
+}
+
+/**
+ * Read or require the given file with `opts`
+ */
+
+function read(fp, opts, fn) {
+  opts = extend({encoding: 'utf8'}, opts);
+  if (opts.read) {
+    return opts.read(fp, opts);
+  } else if (fn) {
+    return fn(fp, opts);
+  } else {
+    try {
+      if (/\.js(on)?$/.test(fp)) {
+        return require(fp);
       } else {
-        arr = arr.concat(fp);
+        return fs.readFileSync(fp, opts);
       }
+    } catch (err) {
+      if (!opts.silent) throw err;
     }
-  } catch(err) {}
+  }
+}
 
-  return arr;
+/**
+ * Validate (filter) files using the given filter
+ * function, falling back on the default filter.
+ */
+
+function filter(fp, opts) {
+  if (opts && opts.filter) {
+    return opts.filter(fp, opts);
+  }
+  return /[^x]\.js$/.test(fp);
+}
+
+/**
+ * Utility functions
+ */
+
+function isDir(fp) {
+  return fs.statSync(fp).isDirectory();
+}
+
+function isFile(fp) {
+  return !isDir(fp)
+}
+
+function resolve(dir) {
+  return function (fp) {
+    return path.resolve(dir, fp);
+  }
+}
+
+function sortArgs (args) {
+  var len = args.length;
+  var res = {};
+
+  while (len--) {
+    var arg = args[len];
+    res[typeOf(arg)] = arg;
+  }
+
+  return res;
 }

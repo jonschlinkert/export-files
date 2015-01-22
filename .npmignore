@@ -11,8 +11,6 @@ TODO.md
 vendor
 
 # npmignore
-.travis.yml
-.verb.md
+.*
 fixtures
-test
-test.js
+test{,.js}
