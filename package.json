@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "extend-shallow": "^0.2.0",
-    "kind-of": "^1.0.0"
+    "kind-of": "^1.0.0",
+    "micromatch": "^1.0.1"
   },
   "devDependencies": {
     "file-reader": "^1.0.0",

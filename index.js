@@ -11,25 +11,32 @@ var fs = require('fs');
 var path = require('path');
 var typeOf = require('kind-of');
 var extend = require('extend-shallow');
+var micromatch = require('micromatch');
 
 /**
  * Expose `exportFiles`
  */
 
-module.exports = function exportFiles(dir, recurse, options, fn) {
-  if (typeOf(recurse) === 'function') {
-    fn = recurse; options = {}; recurse = false;
-  }
-
-  if (typeOf(options) === 'function') {
-    fn = options; options = {};
-  }
-
-  if (typeOf(recurse) === 'object') {
-    options = recurse; recurse = false;
-  }
+module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
+  var args = [].slice.call(arguments, 1);
+  var rest = sortArgs(args);
+  var re = rest['regexp'];
+  patterns = rest['string'] || rest['array'];
+  recurse = rest['boolean'];
+  options = rest['object'];
+  fn = rest['function'];
 
   var opts = extend({recurse: recurse || false}, options);
+  if (patterns) {
+    opts.filter = function (fp) {
+      return micromatch.makeRe(patterns).test(fp);
+    }
+  }
+  if (re) {
+    opts.filter = function (fp) {
+      return re.test(fp);
+    }
+  }
 
   return lookup(dir, opts.recurse, opts).reduce(function (res, fp) {
     if (filter(fp, opts, fn)) {
@@ -135,4 +142,16 @@ function resolve(dir) {
   return function (fp) {
     return path.resolve(dir, fp);
   }
+}
+
+function sortArgs (args) {
+  var len = args.length;
+  var res = {};
+
+  while (len--) {
+    var arg = args[len];
+    res[typeOf(arg)] = arg;
+  }
+
+  return res;
 }

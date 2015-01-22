@@ -51,6 +51,18 @@ describe('export-files:', function() {
   });
 });
 
+describe('patterns', function() {
+  it('should allow glob patterns to filter files:', function() {
+    var files = exportFiles(fixtures, '**/*.json');
+    files.should.eql({ a: { desc: 'aaa', name: 'a.json' }, b: { bb: 'bbb' } });
+  });
+
+  it('should allow regex patterns to filter files:', function() {
+    var files = exportFiles(fixtures, /\.json/);
+    files.should.eql({ a: { desc: 'aaa', name: 'a.json' }, b: { bb: 'bbb' } });
+  });
+});
+
 describe('callback function', function() {
   it('should allow a callback function to read files', function() {
     var files = exportFiles(fixtures, function (fp) {
