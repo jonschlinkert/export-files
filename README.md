@@ -10,6 +10,8 @@ npm i export-files --save
 
 ## Usage
 
+Specify the directory with files to export (this is a **required** argument):
+
 ```js
 module.exports = require('export-files')(__dirname);
 //=> {a: [function], b: [function], c: [function]}
@@ -18,13 +20,33 @@ module.exports = require('export-files')(__dirname);
 ### Params
 
 ```js
-module.exports = require('export-files')(dir, recurse, options);
+module.exports = require('export-files')(dir, patterns, recurse, options, fn);
 ```
 
-* `dir` **{String}**: directory with files to export.
-* `recurse` **{Boolean|Object}**: or options. When `true` reads directories recursivly. Default is `false`.
-* `options` **{Object}**: Options for filtering, reading, and recursion.
+* `dir` **{String}**: (required) directory with files to export.
+* `patterns` **{String|Array|RegExp}**: (optional) glob patterns or regex for filtering files
+* `recurse` **{Boolean|Object}**: (optional) or options. When `true` reads directories recursivly. Default is `false`.
+* `options` **{Object}**: (optional) options for filtering, reading, and recursion.
+    - `read` **{Function}**: function for reading or requiring files
+    - `renameKey` **{Function}**: function for naming keys on the returned object
+    - `filter` **{Function}**: function for filtering files
+* `fn` **{Function}**: (optional) pass a custom reader function.
 
+## Examples
+
+### glob patterns
+
+Filter and require only `.json` files:
+
+```js
+module.exports = require('export-files')(__dirname, '**/*.json');
+```
+
+Filter and require only `.yml` files, with a custom
+
+```js
+module.exports = require('export-files')(__dirname, '**/*.json');
+```
 
 ## Run Tests
 
