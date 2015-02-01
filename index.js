@@ -9,9 +9,10 @@
 
 var fs = require('fs');
 var path = require('path');
+var map = require('arr-map')
 var typeOf = require('kind-of');
 var extend = require('extend-shallow');
-var micromatch = require('micromatch');
+var mm = require('micromatch');
 
 /**
  * Expose `exportFiles`
@@ -20,8 +21,8 @@ var micromatch = require('micromatch');
 module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
   var args = [].slice.call(arguments, 1);
   var rest = sortArgs(args);
-  var re = rest['regexp'];
-  patterns = rest['string'] || rest['array'];
+
+  patterns = rest['string'] || rest['array'] || rest['regexp'];
   recurse = rest['boolean'];
   options = rest['object'];
   fn = rest['function'];
@@ -29,13 +30,8 @@ module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
   var opts = extend({recurse: recurse || false}, options);
   if (patterns) {
     opts.filter = function (fp) {
-      return micromatch.makeRe(patterns).test(fp);
-    }
-  }
-  if (re) {
-    opts.filter = function (fp) {
-      return re.test(fp);
-    }
+      return mm.isMatch(fp, patterns);
+    };
   }
 
   return lookup(dir, opts.recurse, opts).reduce(function (res, fp) {
@@ -63,7 +59,7 @@ function lookup(dir, recurse) {
   var len = files.length;
   var res = [];
 
-  if (recurse === false) return files.map(resolve(dir));
+  if (recurse === false) return map(files, resolve(dir));
 
   while (len--) {
     var fp = path.resolve(dir, files[len]);
@@ -134,14 +130,10 @@ function isDir(fp) {
   return fs.statSync(fp).isDirectory();
 }
 
-function isFile(fp) {
-  return !isDir(fp)
-}
-
 function resolve(dir) {
   return function (fp) {
     return path.resolve(dir, fp);
-  }
+  };
 }
 
 function sortArgs (args) {
