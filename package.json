@@ -1,7 +1,7 @@
 {
   "name": "export-files",
   "description": "node.js utility for exporting a directory of files as modules.",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "homepage": "https://github.com/jonschlinkert/export-files",
   "author": {
     "name": "Jon Schlinkert",
@@ -29,9 +29,10 @@
     "test": "mocha -R spec"
   },
   "dependencies": {
+    "arr-map": "^1.0.0",
     "extend-shallow": "^0.2.0",
     "kind-of": "^1.0.0",
-    "micromatch": "^1.0.1"
+    "micromatch": "^1.2.2"
   },
   "devDependencies": {
     "file-reader": "^1.0.0",
