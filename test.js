@@ -2,13 +2,13 @@
  * export-files <https://github.com/jonschlinkert/export-files>
  *
  * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT License
+ * Licensed under the MIT License.
  */
 
 'use strict';
 
 var path = require('path');
-var should = require('should');
+require('should');
 var exportFiles = require('./');
 
 /**

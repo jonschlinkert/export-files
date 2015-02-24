@@ -7,10 +7,7 @@
     "name": "Jon Schlinkert",
     "url": "https://github.com/jonschlinkert"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/export-files.git"
-  },
+  "repository": "jonschlinkert/export-files",
   "bugs": {
     "url": "https://github.com/jonschlinkert/export-files/issues"
   },
@@ -26,7 +23,7 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "mocha -R spec"
+    "test": "mocha"
   },
   "dependencies": {
     "arr-map": "^1.0.0",
@@ -37,8 +34,7 @@
   "devDependencies": {
     "file-reader": "^1.0.0",
     "mocha": "*",
-    "read-yaml": "*",
-    "should": "*"
+    "read-yaml": "*"
   },
   "keywords": [
     "export",
