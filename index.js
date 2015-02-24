@@ -98,16 +98,43 @@ function read(fp, opts, fn) {
   } else if (fn) {
     return fn(fp, opts);
   } else {
-    try {
-      if (/\.js(on)?$/.test(fp)) {
-        return require(fp);
-      } else {
-        return fs.readFileSync(fp, opts);
+    if (endsWith(fp, '.js')) {
+      return tryRequire(fp);
+    } else {
+      var str = fs.readFileSync(fp, opts);
+      if (endsWith(fp, '.json')) {
+        return tryCatch(JSON.parse, str);
       }
-    } catch (err) {
-      if (!opts.silent) throw err;
+      return str;
     }
   }
+}
+
+/**
+ * Keep try-catch isolate for v8
+ * optimizations
+ */
+
+function tryCatch(fn, str) {
+  try {
+    return fn(str);
+  } catch(err) {}
+  return {};
+}
+
+function tryRequire(fp) {
+  try {
+    return require(path.resolve(fp));
+  } catch(err) {}
+  return null;
+}
+
+/**
+ * Return true if `str` ends with `ch`aracters
+ */
+
+function endsWith(str, ch) {
+  return str.slice(-ch.length) === ch;
 }
 
 /**
@@ -144,6 +171,5 @@ function sortArgs (args) {
     var arg = args[len];
     res[typeOf(arg)] = arg;
   }
-
   return res;
 }
