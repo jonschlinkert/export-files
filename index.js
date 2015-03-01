@@ -35,21 +35,29 @@ module.exports = exportFiles;
 
 function exportFiles(dir, patterns, recurse, options, fn) {
   if (arguments.length === 1 && !isGlob(dir)) {
-    return lookup(dir, false, {}).reduce(function (res, fp) {
+
+    var key = 'exportFiles:' + dir;
+    if (cache.hasOwnProperty(key)) {
+      return cache[key];
+    }
+
+    var result = lookup(dir, false, {}).reduce(function (res, fp) {
       if (filter(fp, fn)) {
         res[basename(fp)] = read(fp, fn);
       }
       return res;
     }, {});
+    return (cache[key] = result);
   }
   return explode.apply(explode, arguments);
 }
+
+var cache = exportFiles.cache = {};
 
 function explode(dir, patterns, recurse, options, fn) {
   // don't slice args for v8 optimization
   var len = arguments.length - 1;
   var args = new Array(len);
-
   for (var i = 0; i < len; i++) {
     args[i] = arguments[i + 1];
   }
@@ -88,6 +96,11 @@ function lookup(dir, recurse) {
     throw new Error('export-files expects a string as the first argument.');
   }
 
+  var key = 'lookup:' + dir + ('' + recurse);
+  if (cache.hasOwnProperty(key)) {
+    return cache[key];
+  }
+
   var files = fs.readdirSync(dir);
   var len = files.length;
   var res = [];
@@ -102,7 +115,7 @@ function lookup(dir, recurse) {
       res.push(fp);
     }
   }
-  return res;
+  return (cache[key] = res);
 }
 
 /**
