@@ -1,8 +1,8 @@
-/**
+/*!
  * export-files <https://github.com/jonschlinkert/export-files>
  *
  * Copyright (c) 2014-2015, Jon Schlinkert.
- * Licensed under the MIT license.
+ * Licensed under the MIT License.
  */
 
 'use strict';
@@ -11,6 +11,7 @@ var fs = require('fs');
 var path = require('path');
 var map = require('arr-map')
 var typeOf = require('kind-of');
+var isGlob = require('is-glob');
 var extend = require('extend-shallow');
 var mm = require('micromatch');
 
@@ -18,10 +19,42 @@ var mm = require('micromatch');
  * Expose `exportFiles`
  */
 
-module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
-  var args = [].slice.call(arguments, 1);
-  var rest = sortArgs(args);
+module.exports = exportFiles;
 
+/**
+ * Export files from the give `directory` filtering the
+ * results with
+ *
+ * @param  {String} `directory` Use `__dirname` for the immediate directory.
+ * @param  {String|Array} `patterns` Glob patterns to use for matching.
+ * @param  {Boolean} `recurse` Pass `true` to recurse deeper than the current directory.
+ * @param  {String} `options`
+ * @param  {Function} `fn` Callback for filtering.
+ * @return {String}
+ */
+
+function exportFiles(dir, patterns, recurse, options, fn) {
+  if (arguments.length === 1 && !isGlob(dir)) {
+    return lookup(dir, false, {}).reduce(function (res, fp) {
+      if (filter(fp, fn)) {
+        res[basename(fp)] = read(fp, fn);
+      }
+      return res;
+    }, {});
+  }
+  return explode.apply(explode, arguments);
+}
+
+function explode(dir, patterns, recurse, options, fn) {
+  // don't slice args for v8 optimization
+  var len = arguments.length - 1;
+  var args = new Array(len);
+
+  for (var i = 0; i < len; i++) {
+    args[i] = arguments[i + 1];
+  }
+
+  var rest = sortArgs(args);
   patterns = rest['string'] || rest['array'] || rest['regexp'];
   recurse = rest['boolean'];
   options = rest['object'];
@@ -40,7 +73,7 @@ module.exports = function exportFiles(dir, patterns, recurse, options, fn) {
     }
     return res;
   }, {});
-};
+}
 
 /**
  * Recursively read directories, starting with the given `dir`.
@@ -82,9 +115,15 @@ function renameKey(fp, opts) {
   if (opts && opts.renameKey) {
     return opts.renameKey(fp, opts);
   }
+  return basename(fp);
+}
 
-  var ext = path.extname(fp);
-  return path.basename(fp, ext);
+/**
+ * Get the basename of a file path.
+ */
+
+function basename(fp) {
+  return path.basename(fp, path.extname(fp));
 }
 
 /**
@@ -92,32 +131,33 @@ function renameKey(fp, opts) {
  */
 
 function read(fp, opts, fn) {
-  opts = extend({encoding: 'utf8'}, opts);
+  opts = opts || {};
+  opts.encoding = opts.encoding || 'utf8';
+
   if (opts.read) {
     return opts.read(fp, opts);
   } else if (fn) {
     return fn(fp, opts);
+  }
+
+  if (endsWith(fp, '.js')) {
+    return tryRequire(fp);
   } else {
-    if (endsWith(fp, '.js')) {
-      return tryRequire(fp);
-    } else {
-      var str = fs.readFileSync(fp, opts);
-      if (endsWith(fp, '.json')) {
-        return tryCatch(JSON.parse, str);
-      }
-      return str;
+    var str = tryCatch(fs.readFileSync, fp, opts);
+    if (endsWith(fp, '.json')) {
+      return tryCatch(JSON.parse, str);
     }
+    return str;
   }
 }
 
 /**
- * Keep try-catch isolate for v8
- * optimizations
+ * Keep try-catch isolated for v8 optimizations
  */
 
-function tryCatch(fn, str) {
+function tryCatch(fn, str, opts) {
   try {
-    return fn(str);
+    return fn(str, opts);
   } catch(err) {}
   return {};
 }
