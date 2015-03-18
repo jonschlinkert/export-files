@@ -24,11 +24,11 @@ module.exports = require('export-files')(__dirname);
 
 ## Related
 * [to-exports](https://github.com/jonschlinkert/to-exports): Create exports from a directory of non-javascript or javascript files.
-* [export-dirs](https://github.com/jonschlinkert/export-dirs): node.js utility for exporting directories as modules.
+* [export-dirs](https://github.com/jonschlinkert/export-dirs): Export directories and their files as node.js modules.
 * [map-files](https://github.com/jonschlinkert/map-files): Return an object for a glob of files. Pass a `rename` function for the keys, or a `parse` function for the content, allowing it to be used for readable or require-able files.
 * [file-reader](https://github.com/jonschlinkert/file-reader): Read a glob of files, dynamically choosing the reader or requiring the files based on the file extension.
 
-## Run Tests
+## Running Tests
 Install dev dependencies.
 
 ```bash
