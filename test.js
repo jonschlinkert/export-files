@@ -11,20 +11,6 @@ var path = require('path');
 require('should');
 var exportFiles = require('./');
 
-/**
- * Support functions
- */
-
-function rename(fp) {
-  return path.basename(fp);
-}
-
-function filter(re) {
-  return function(fp) {
-    return re.test(fp);
-  }
-}
-
 // path must be absolute for requires to work
 var fixtures = path.join(process.cwd(), 'fixtures');
 

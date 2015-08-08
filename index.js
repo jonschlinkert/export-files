@@ -23,7 +23,7 @@ module.exports = function exportFiles(dir) {
     var name = dirs[len];
     var fp = path.resolve(dir, name);
     if (!fs.statSync(fp).isDirectory() && isValid(fp)) {
-      res[basename(name)] = require(fp);
+      defineProp(res, basename(name), fp);
     }
   }
   return res;
@@ -48,12 +48,12 @@ function tryReaddir(fp) {
   }
 }
 
-function tryRequire(fp) {
-  try {
-    return require(fp);
-  } catch(err) {
-    err.origin = __dirname;
-    err.msg = 'export-dirs cannot require: ' + fp;
-    throw new Error(err);
-  }
+function defineProp (obj, name, fp) {
+  Object.defineProperty(obj, name, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      return require(fp);
+    }
+  });
 }
