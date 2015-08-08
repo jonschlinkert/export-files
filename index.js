@@ -7,13 +7,17 @@
 
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
+var lazy = require('lazy-cache')(require);
+var lazyPath = lazy('path');
+var lazyFs = lazy('fs');
 
 module.exports = function exportFiles(dir) {
   if (typeof dir !== 'string') {
     throw new TypeError('export-files expects `dir` to be a string.');
   }
+
+  var path = lazyPath();
+  var fs = lazyFs();
 
   var dirs = tryReaddir(dir);
   var len = dirs.length;
@@ -23,7 +27,7 @@ module.exports = function exportFiles(dir) {
     var name = dirs[len];
     var fp = path.resolve(dir, name);
     if (!fs.statSync(fp).isDirectory() && isValid(fp)) {
-      res[basename(name)] = require(fp);
+      defineProp(res, basename(name), lazy(fp));
     }
   }
   return res;
@@ -39,6 +43,7 @@ function basename(fp) {
 }
 
 function tryReaddir(fp) {
+  var fs = lazyFs();
   try {
     return fs.readdirSync(fp);
   } catch(err) {
@@ -48,12 +53,12 @@ function tryReaddir(fp) {
   }
 }
 
-function tryRequire(fp) {
-  try {
-    return require(fp);
-  } catch(err) {
-    err.origin = __dirname;
-    err.msg = 'export-dirs cannot require: ' + fp;
-    throw new Error(err);
-  }
+function defineProp (obj, name, lazyMod) {
+  Object.defineProperty(obj, name, {
+    enumerable: true,
+    configurable: true,
+    get: function () {
+      return lazyMod();
+    }
+  });
 }
