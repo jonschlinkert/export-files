@@ -3,23 +3,15 @@
   "description": "node.js utility for exporting a directory of files as modules.",
   "version": "2.1.0",
   "homepage": "https://github.com/jonschlinkert/export-files",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/export-files.git"
-  },
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "jonschlinkert/export-files",
   "bugs": {
     "url": "https://github.com/jonschlinkert/export-files/issues"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/jonschlinkert/export-files/blob/master/LICENSE"
-  },
+  "license": "MIT",
   "files": [
-    "index.js"
+    "index.js",
+    "utils.js"
   ],
   "main": "index.js",
   "engines": {
@@ -28,9 +20,13 @@
   "scripts": {
     "test": "mocha"
   },
+  "dependencies": {
+    "extend-shallow": "^2.0.1",
+    "lazy-cache": "^0.1.0"
+  },
   "devDependencies": {
-    "mocha": "^2.2.1",
-    "should": "^5.0.1"
+    "mocha": "*",
+    "should": "*"
   },
   "keywords": [
     "export",
@@ -40,7 +36,14 @@
     "module",
     "modules"
   ],
-  "dependencies": {
-    "lazy-cache": "^0.1.0"
+  "verb": {
+    "related": {
+      "list": [
+        "to-exports",
+        "export-dirs",
+        "map-files",
+        "file-reader"
+      ]
+    }
   }
 }
