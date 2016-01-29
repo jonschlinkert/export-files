@@ -7,16 +7,12 @@
 
 'use strict';
 
-var path = require('path');
+require('mocha');
 require('should');
+var path = require('path');
 var exportFiles = require('./');
 
-// path must be absolute for requires to work
 var fixtures = path.join(process.cwd(), 'fixtures');
-
-/**
- * Tests
- */
 
 describe('export-files:', function() {
   it('should return the modules from the given cwd', function() {

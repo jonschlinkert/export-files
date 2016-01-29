@@ -21,10 +21,10 @@
     "test": "mocha"
   },
   "dependencies": {
-    "extend-shallow": "^2.0.1",
-    "lazy-cache": "^0.1.0"
+    "lazy-cache": "^1.0.3"
   },
   "devDependencies": {
+    "gulp-format-md": "^0.1.5",
     "mocha": "*",
     "should": "*"
   },
@@ -39,11 +39,18 @@
   "verb": {
     "related": {
       "list": [
-        "to-exports",
         "export-dirs",
+        "file-reader",
         "map-files",
-        "file-reader"
+        "to-exports"
       ]
-    }
+    },
+    "reflinks": [
+      "to-exports"
+    ],
+    "layout": "default",
+    "plugins": [
+      "gulp-format-md"
+    ]
   }
 }
