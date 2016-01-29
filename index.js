@@ -7,58 +7,67 @@
 
 'use strict';
 
+var fs = require('fs');
+var path = require('path');
 var lazy = require('lazy-cache')(require);
-var lazyPath = lazy('path');
-var lazyFs = lazy('fs');
 
-module.exports = function exportFiles(dir) {
+module.exports = function(dir) {
   if (typeof dir !== 'string') {
-    throw new TypeError('export-files expects `dir` to be a string.');
+    throw new TypeError('expected "' + dir + '" to be a string');
   }
 
-  var path = lazyPath();
-  var fs = lazyFs();
-
-  var dirs = tryReaddir(dir);
+  var dirs = fs.readdirSync(dir);
   var len = dirs.length;
+  var idx = -1;
   var res = {}
 
-  while (len--) {
-    var name = dirs[len];
+  while (++idx < len) {
+    var name = dirs[idx];
     var fp = path.resolve(dir, name);
-    if (!fs.statSync(fp).isDirectory() && isValid(fp)) {
+
+    if (isJavaScriptFile(fp)) {
       defineProp(res, basename(name), lazy(fp));
     }
   }
   return res;
 };
 
-function isValid(fp) {
-  return fp.indexOf('index.js') === -1
-    && fp.substr(-3) === '.js';
-}
+/**
+ * Return true if the file is a `.js` file.
+ *
+ * @param {String} filepath
+ * @return {Boolean}
+ */
 
-function basename(fp) {
-  return fp.substr(0, fp.length - 3);
-}
-
-function tryReaddir(fp) {
-  var fs = lazyFs();
-  try {
-    return fs.readdirSync(fp);
-  } catch(err) {
-    err.origin = __dirname;
-    err.msg = 'export-dirs cannot read directory: ' + fp;
-    throw new Error(err);
+function isJavaScriptFile(filepath) {
+  if (!fs.statSync(filepath).isFile()) {
+    return false;
   }
+  if (path.basename(filepath) === 'index.js') {
+    return false;
+  }
+  return filepath.slice(-3) === '.js';
 }
 
-function defineProp (obj, name, lazyMod) {
-  Object.defineProperty(obj, name, {
+/**
+ * Since we know the file should always be a `.js` file,
+ * we can just remove the last 3 characters to get
+ * the name.
+ *
+ * @param {String} filepath
+ * @return {String}
+ */
+
+function basename(filepath) {
+  return filepath.slice(0, filepath.length - 3);
+}
+
+function defineProp(cache, name, fn) {
+  Object.defineProperty(cache, name, {
     enumerable: true,
     configurable: true,
     get: function () {
-      return lazyMod();
+      return fn();
     }
   });
 }
