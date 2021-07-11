@@ -16,7 +16,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=10"
+    "node": ">=11"
   },
   "scripts": {
     "test": "mocha"
@@ -34,20 +34,16 @@
     "modules"
   ],
   "verb": {
-    "related": {
-      "list": [
-        "export-dirs",
-        "file-reader",
-        "map-files",
-        "to-exports"
-      ]
-    },
-    "reflinks": [
-      "to-exports"
-    ],
+    "toc": false,
     "layout": "default",
+    "tasks": [
+      "readme"
+    ],
     "plugins": [
       "gulp-format-md"
-    ]
+    ],
+    "lint": {
+      "reflinks": true
+    }
   }
 }
