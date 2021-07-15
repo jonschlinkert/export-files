@@ -14,4 +14,15 @@ describe('utils', () => {
     assert.equal(utils.camelcase('BBB-Bar'), 'BBBBar');
     assert.equal(utils.camelcase('BBB Bar'), 'BBBBar');
   });
+
+  it('should snakecase', () => {
+    assert.equal(utils.snakecase('---foo.bar'), 'foo_bar');
+    assert.equal(utils.snakecase('foo.bar'), 'foo_bar');
+    assert.equal(utils.snakecase('foo_bar'), 'foo_bar');
+    assert.equal(utils.snakecase('foo-bar'), 'foo_bar');
+    assert.equal(utils.snakecase('foo bar'), 'foo_bar');
+    assert.equal(utils.snakecase('BBB-Bar'), 'bbb_bar');
+    assert.equal(utils.snakecase('BBB Bar'), 'bbb_bar');
+    assert.equal(utils.snakecase('TableRow'), 'table_row');
+  });
 });

@@ -3,6 +3,8 @@
 const { defineProperty, getOwnPropertyDescriptor, ownKeys } = Reflect;
 const variableRegex = /^[_$a-zA-Z][_$a-zA-Z0-9]*$/;
 
+const titlecase = s => s[0].toLocaleUpperCase() + s.slice(1).toLocaleLowerCase();
+
 exports.shallowClone = obj => {
   if (typeof obj === 'function') return obj;
   const Ctor = obj.constructor;
@@ -16,24 +18,24 @@ exports.shallowClone = obj => {
 exports.isValidName = name => variableRegex.test(name);
 exports.isUpperCase = name => /[A-Z]/.test(name[0]);
 
-exports.changecase = (input, replacer) => {
-  return input.replace(/[^a-z0-9]+([a-z0-9])|[^\w]/gi, replacer);
+exports.split = input => {
+  return input.split(/([0-9A-Z][a-z]+|[^\W_]+)|[\W_]+/).filter(Boolean);
 };
 
 exports.camelcase = input => {
-  const output = exports.changecase(input, (m, $1) => $1 ? $1.toLocaleUpperCase() : '');
+  const words = exports.split(input);
+  let output = '';
 
-  if (!/^[A-Z]{2}/.test(output)) {
-    return output[0].toLocaleLowerCase() + output.slice(1);
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    output += /^[A-Z]{2}/.test(w) ? w : i === 0 ? w.toLocaleLowerCase() : titlecase(w);
   }
 
   return output;
 };
 
 exports.pascalcase = name => name[0].toLocaleUpperCase() + name.slice(1);
-exports.snakecase = input => {
-  return exports.changecase(input, (m, $1) => $1 ? '_' + $1 : '').toLocaleLowerCase();
-};
+exports.snakecase = input => exports.split(input).join('_').toLocaleLowerCase();
 
 exports.namify = (file, options) => {
   const stem = file.stem;
