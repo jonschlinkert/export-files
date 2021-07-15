@@ -1,7 +1,7 @@
 {
   "name": "export-files",
   "description": "node.js utility for exporting a directory of files as modules.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "homepage": "https://github.com/jonschlinkert/export-files",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "funding": "https://github.com/sponsors/jonschlinkert",

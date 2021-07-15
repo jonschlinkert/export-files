@@ -172,10 +172,10 @@ You might also be interested in these projects:
 
 ### Contributors
 
-| **Commits** | **Contributor** |  
-| --- | --- |  
-| 43 | [jonschlinkert](https://github.com/jonschlinkert) |  
-| 4  | [doowb](https://github.com/doowb) |  
+| **Commits** | **Contributor** |
+| --- | --- |
+| 43 | [jonschlinkert](https://github.com/jonschlinkert) |
+| 4  | [doowb](https://github.com/doowb) |
 
 ### Author
 
