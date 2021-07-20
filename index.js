@@ -26,6 +26,8 @@ const requires = (dir, obj = {}, options = {}) => {
   }
 
   const define = (o, key, value, { filepath, dataDescriptor = false } = {}) => {
+    const k = Symbol('key');
+
     if (seen.has(key) && options.allowDuplicates !== true) {
       const err = new Error(`Duplicate key: "${key}" exported from ${filepath}`);
       err.key = key;
@@ -39,7 +41,16 @@ const requires = (dir, obj = {}, options = {}) => {
     if (dataDescriptor === true) {
       defineProperty(o, key, { value, writable: true, enumerable: true });
     } else {
-      defineProperty(o, key, { configurable: true, enumerable: true, get: value });
+      defineProperty(o, key, {
+        configurable: true,
+        enumerable: true,
+        set(value) {
+          o[k] = value;
+        },
+        get() {
+          return o[k] || value();
+        }
+      });
     }
   };
 
